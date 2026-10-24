@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "arcgis-docs": {
+      "command": "node",
+      "args": ["/absolute/path/to/arcgis-docs-mcp/dist/server.js"],
+      "env": {
+        "ARCGIS_DOCS_DATA": "/absolute/path/to/arcgis-docs-mcp/data/pages.json"
+      }
+    }
+  }
+}
