@@ -4,8 +4,6 @@ A local [Model Context Protocol](https://modelcontextprotocol.io/) server for se
 
 The ArcGIS docs site has no `llms.txt`, no first-party Agent Skill, and the information an agent needs is spread across release notes, guides, API references, and samples. This project fetches a curated set of those pages, converts them to Markdown, and exposes fast local search plus page retrieval over MCP.
 
-> Weekend-scaffold status: **working local index + MCP server**. It is intentionally small: 60 seed pages, lexical search, and four read-only tools. It is not a mirror of the entire docs site.
-
 ## Why
 
 - Agents need **local, citable context**; scraping the docs on every prompt is slow and brittle.
@@ -55,12 +53,12 @@ A copy is in [`examples/mcp.json`](./examples/mcp.json). For Claude Desktop this
 
 ## Tools
 
-| Tool | What it does | Typical use |
-| --- | --- | --- |
-| `search_docs` | Full-text search with kind filter, URL, score, and snippet | “How do I migrate widgets to components?” |
-| `get_page` | Returns the indexed Markdown for a URL, with optional truncation | Read the migration guide or API reference |
-| `get_api` | Searches API reference pages for a class/function/module | `MapView`, `FeatureLayer`, `geometryEngine` |
-| `list_sources` | Counts by kind, freshness, and data-file path | Check whether the index is present and fresh |
+| Tool           | What it does                                                     | Typical use                                  |
+| -------------- | ---------------------------------------------------------------- | -------------------------------------------- |
+| `search_docs`  | Full-text search with kind filter, URL, score, and snippet       | “How do I migrate widgets to components?”    |
+| `get_page`     | Returns the indexed Markdown for a URL, with optional truncation | Read the migration guide or API reference    |
+| `get_api`      | Searches API reference pages for a class/function/module         | `MapView`, `FeatureLayer`, `geometryEngine`  |
+| `list_sources` | Counts by kind, freshness, and data-file path                    | Check whether the index is present and fresh |
 
 Resources:
 
@@ -107,17 +105,17 @@ npm run index -- --seed https://developers.arcgis.com/javascript/latest/faq/ \
 npm run index -- --dry-run
 ```
 
-| Option | Default | Meaning |
-| --- | --- | --- |
-| `--out <path>` | `data/pages.json` (or `ARCGIS_DOCS_DATA`) | Index file |
-| `--max-pages <n>` | `80` | Maximum pages fetched in this run |
-| `--concurrency <n>` | `4` | Parallel fetches |
-| `--timeout <ms>` | `20000` | Per-request timeout |
-| `--crawl` | off | Follow same-site docs links one level |
-| `--force` | off | Re-fetch even when the content hash is unchanged |
-| `--seed <url...>` | built-in list | Override the seed URLs |
-| `--dry-run` | off | Print seeds without fetching |
-| `--strict` | off | Exit non-zero if any page fails |
+| Option              | Default                                   | Meaning                                          |
+| ------------------- | ----------------------------------------- | ------------------------------------------------ |
+| `--out <path>`      | `data/pages.json` (or `ARCGIS_DOCS_DATA`) | Index file                                       |
+| `--max-pages <n>`   | `80`                                      | Maximum pages fetched in this run                |
+| `--concurrency <n>` | `4`                                       | Parallel fetches                                 |
+| `--timeout <ms>`    | `20000`                                   | Per-request timeout                              |
+| `--crawl`           | off                                       | Follow same-site docs links one level            |
+| `--force`           | off                                       | Re-fetch even when the content hash is unchanged |
+| `--seed <url...>`   | built-in list                             | Override the seed URLs                           |
+| `--dry-run`         | off                                       | Print seeds without fetching                     |
+| `--strict`          | off                                       | Exit non-zero if any page fails                  |
 
 The seed list lives in [`src/indexer/seeds.ts`](./src/indexer/seeds.ts). It covers:
 
@@ -164,18 +162,18 @@ Tests do not hit the network. They cover URL normalization, HTML extraction, sea
 
 Architecture:
 
-| Path | Responsibility |
-| --- | --- |
-| `src/server.ts` | stdio entry point; loads the index and connects the transport |
-| `src/server-factory.ts` | MCP tools/resources; no I/O except the loaded search object |
-| `src/lib/search.ts` | MiniSearch wrapper, snippets, `llms.txt`, page lookup |
-| `src/lib/html.ts` | Cheerio + Turndown extraction pipeline |
-| `src/lib/fetch.ts` | fetch with retries, timeout, meta-refresh handling |
-| `src/lib/store.ts` | JSON index read/write, hashing, dedupe, truncation |
-| `src/lib/url.ts` | URL normalization, page-kind detection, crawl filters |
-| `src/indexer/indexer.ts` | seed fetch, crawl, merge, report |
-| `src/indexer/cli.ts` | `index`, `status`, `search`, `llms` commands |
-| `src/indexer/seeds.ts` | curated seed list and optional blog list |
+| Path                     | Responsibility                                                |
+| ------------------------ | ------------------------------------------------------------- |
+| `src/server.ts`          | stdio entry point; loads the index and connects the transport |
+| `src/server-factory.ts`  | MCP tools/resources; no I/O except the loaded search object   |
+| `src/lib/search.ts`      | MiniSearch wrapper, snippets, `llms.txt`, page lookup         |
+| `src/lib/html.ts`        | Cheerio + Turndown extraction pipeline                        |
+| `src/lib/fetch.ts`       | fetch with retries, timeout, meta-refresh handling            |
+| `src/lib/store.ts`       | JSON index read/write, hashing, dedupe, truncation            |
+| `src/lib/url.ts`         | URL normalization, page-kind detection, crawl filters         |
+| `src/indexer/indexer.ts` | seed fetch, crawl, merge, report                              |
+| `src/indexer/cli.ts`     | `index`, `status`, `search`, `llms` commands                  |
+| `src/indexer/seeds.ts`   | curated seed list and optional blog list                      |
 
 ## Limitations
 
