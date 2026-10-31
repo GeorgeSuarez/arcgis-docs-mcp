@@ -67,23 +67,43 @@ Resources:
 
 All tools are read-only and local (`readOnlyHint: true`, `openWorldHint: false`).
 
-Example `search_docs` response:
+Example `search_docs` response (truncated to two hits):
 
 ```json
 {
   "query": "migrate widgets to components",
-  "count": 2,
+  "count": 8,
   "results": [
     {
       "url": "https://developers.arcgis.com/javascript/latest/migrating-to-components",
       "title": "Migrate to components",
       "kind": "guide",
-      "score": 31.84,
-      "snippet": "If you're migrating an existing widget-based application, widgets are deprecated as of version 5.0…"
+      "score": 134.796,
+      "snippet": "If you’re migrating an existing widget-based application, widgets are deprecated as of version 5.0 and will be removed in a future release.…"
+    },
+    {
+      "url": "https://developers.arcgis.com/javascript/latest/faq",
+      "title": "Frequently Asked Questions",
+      "kind": "guide",
+      "score": 78.195,
+      "snippet": "…"
     }
   ]
 }
 ```
+
+`count` is how many hits were returned (up to `limit`, default 8), not how many are relevant. Matching is fuzzy and prefix-aware, so the tail is padded with weak hits: read the snippets, and let the score gap between the top hit and the rest guide you.
+
+## Agent skill
+
+[`skills/arcgis-docs/SKILL.md`](./skills/arcgis-docs/SKILL.md) is an Agent Skill covering the search → read → cite loop, plus the behaviours the tool schemas cannot convey:
+
+- score ranks term frequency, not relevance, so a hit stays a candidate until its snippet confirms it
+- a miss means this index lacks the page, not that the SDK lacks the feature
+- aliased URLs resolve to a canonical page; cite the `URL:` line the tool returns
+- how to recover from a truncated page or a stale index
+
+Copy it into your agent's skills directory (for example `~/.agents/skills/arcgis-docs/`) to make it discoverable outside this repo.
 
 ## Indexing
 
@@ -146,7 +166,7 @@ Design choices:
 - **Hash-based skip**: pages are re-fetched, but unchanged Markdown is not rewritten. `--force` overrides.
 - **Alias and hash dedupe**: `/release-notes` and `/v5-1` share content; one canonical page keeps the other as an alias.
 - **Plain JSON**: no SQLite/native dependency. The index is easy to inspect and portable.
-- **Curated, not exhaustive**: 60 high-signal pages beat 10,000 noisy ones for agent context.
+- **Curated, not exhaustive**: 60 high-signal seeds, which land as 54 pages after alias dedupe. That beats 10,000 noisy pages for agent context.
 - **Stdout is reserved for MCP**: all server logging goes to stderr. The indexer logs to stderr and prints the report to stdout.
 
 ## Development
@@ -158,7 +178,7 @@ npm test
 npm run build
 ```
 
-Tests do not hit the network. They cover URL normalization, HTML extraction, search/snippets, and the MCP server over an in-memory transport.
+Tests do not hit the network. They cover URL normalization, fetch retries and meta-refresh, HTML extraction, index storage and dedupe, search/snippets, and the MCP server over an in-memory transport.
 
 Architecture:
 
