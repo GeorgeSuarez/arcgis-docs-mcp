@@ -4,15 +4,6 @@
   "private": true,
   "description": "Local MCP server for searching ArcGIS Maps SDK for JavaScript documentation.",
   "type": "module",
-  "bin": {
-    "arcgis-docs-mcp": "dist/server.js"
-  },
-  "main": "./dist/index.js",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsx src/server.ts",
@@ -24,8 +15,7 @@
     "llms": "tsx src/indexer/cli.ts llms",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -p tsconfig.json",
-    "prepublishOnly": "npm run build"
+    "typecheck": "tsc -p tsconfig.json"
   },
   "keywords": [
     "arcgis",
@@ -58,12 +48,5 @@
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vitest": "^5.0.5"
-  },
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
   }
 }
